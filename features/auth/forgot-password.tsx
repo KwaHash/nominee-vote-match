@@ -42,11 +42,7 @@ export default function ForgotPasswordPage() {
     try {
       const { error } = await forgotPassword(email)
       if (error) {
-        if (error instanceof Error) {
-          setErrorMessage(error.message || '送信中にエラーが発生しました')
-        } else {
-          setErrorMessage('送信中にエラーが発生しました')
-        }
+        setErrorMessage(error || '送信中にエラーが発生しました')
         return
       }
       setSuccessMessage('正常に送信が完了いたしました。メールを確認してパスワードをリセットしてください')
