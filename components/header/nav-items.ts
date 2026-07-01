@@ -1,5 +1,5 @@
 import  { type IconType } from 'react-icons'
-import { RiBook2Line, RiMoneyCnyCircleLine, RiRobot2Line, RiSendPlaneLine, RiUserStarLine } from 'react-icons/ri'
+import { RiBook2Line, RiMoneyCnyCircleLine, RiRobot2Line, RiSendPlaneLine, RiUserStarLine , RiLogoutCircleRLine} from 'react-icons/ri'
 
 export type NavItem = {
   href: string
@@ -23,5 +23,6 @@ export const navItems: NavEntry[] = [
   { href: '/policies', label: ' 政策', icon: RiBook2Line },
   { href: '/communications', label: '発信', icon: RiSendPlaneLine },
   { href: '/supporters', label: '支援者', icon: RiUserStarLine },
-  { href: '/funds-results', label: '資金・成果', icon: RiMoneyCnyCircleLine }
+  { href: '/funds-results', label: '資金・成果', icon: RiMoneyCnyCircleLine },
+  { href: '/logout', label: 'ログアウト', icon: RiLogoutCircleRLine }
 ]
