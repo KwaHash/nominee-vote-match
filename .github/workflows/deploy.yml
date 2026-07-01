@@ -1,0 +1,103 @@
+name: Deploy Nominee-Vote-Match Application
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:  # Allows manual trigger from GitHub Actions UI
+
+jobs:
+  deploy:
+    name: Deploy to Production
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22.11.0'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build application
+        run: npm run build
+        env:
+          NEXT_PUBLIC_APP_ENV: production
+          NEXT_PUBLIC_HOST: ${{ secrets.NEXT_PUBLIC_HOST }}
+
+      - name: Create deployment package
+        run: |
+          mkdir -p deploy
+          cp -r .next deploy/
+          cp -r public deploy/
+          cp -r app deploy/
+          cp -r components deploy/
+          cp -r features deploy/
+          cp -r hooks deploy/
+          cp -r lib deploy/
+          cp -r providers deploy/
+          cp -r styles deploy/
+          cp -r types deploy/
+          cp -r utils deploy/
+          cp package.json deploy/
+          cp package-lock.json deploy/
+          cp next.config.mjs deploy/
+          cp tsconfig.json deploy/
+          cp tailwind.config.ts deploy/
+          cp postcss.config.mjs deploy/
+          cp components.json deploy/
+          cp middleware.ts deploy/
+          tar -czf deploy.tar.gz -C deploy .
+
+      - name: Deploy to server
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: ${{ secrets.SSH_PORT || 22 }}
+          source: "deploy.tar.gz"
+          target: "/tmp"
+
+      - name: Extract and deploy on server
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: ${{ secrets.SSH_PORT || 22 }}
+          script: |
+            cd /var/www/nominee-vote-match
+
+            # Backup current deployment
+            if [ -d ".next" ]; then
+              echo "Backing up current deployment..."
+              tar -czf backup-$(date +%Y%m%d-%H%M%S).tar.gz .next public app components features hooks lib providers styles types utils package.json package-lock.json next.config.mjs tsconfig.json tailwind.config.ts postcss.config.mjs components.json middleware.ts 2>/dev/null || true
+            fi
+
+            # Extract new deployment
+            echo "Extracting new deployment..."
+            tar -xzf /tmp/deploy.tar.gz -C /var/www/nominee-vote-match
+
+            # Install production dependencies
+            echo "Installing dependencies..."
+            npm ci --production
+
+            # Restart PM2 application
+            echo "Restarting PM2 application..."
+            pm2 restart nominee-vote-match-app || pm2 start npm --name "nominee-vote-match-app" -- start
+
+            # Cleanup
+            rm -f /tmp/deploy.tar.gz
+
+            echo "Deployment completed successfully!"
+
+      - name: Cleanup
+        if: always()
+        run: |
+          rm -rf deploy deploy.tar.gz
