@@ -19,15 +19,15 @@ export const viewport: Viewport = {
 }
 
 export const metadata: Metadata = {
-  title: '',
-  applicationName: '',
-  description: '',
+  title: 'わたしの政治',
+  applicationName: 'わたしの政治',
+  description: '政治は、わたしの"推し"から始まる',
   openGraph: {
-    title: '',
-    siteName: '',
-    description: '',
+    title: 'わたしの政治',
+    siteName: 'わたしの政治',
+    description: '政治は、わたしの"推し"から始まる',
     type: 'website',
-    images: [''],
+    images: ['/images/logo.png'],
   },
   icons: [
     {
