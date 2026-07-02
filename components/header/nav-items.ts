@@ -1,5 +1,5 @@
 import  { type IconType } from 'react-icons'
-import { FaRobot } from 'react-icons/fa'
+import { FaRobot, FaListUl, FaRegRegistered } from 'react-icons/fa'
 import { MdPolicy } from 'react-icons/md'
 import { RiBook2Line, RiMoneyCnyCircleLine, RiRobot2Line, RiSendPlaneLine, RiUserStarLine , RiLogoutCircleRLine} from 'react-icons/ri'
 
@@ -31,7 +31,14 @@ export const navItems: NavEntry[] = [
     ],
   },
   { href: '/communications', label: '発信', icon: RiSendPlaneLine },
-  { href: '/supporters', label: '支援者', icon: RiUserStarLine },
+  {
+    label: '支援者',
+    icon: RiUserStarLine,
+    subItems: [
+      { href: '/supporters/create', label: '支援者登録', icon: FaRegRegistered },
+      { href: '/supporters/list', label: '支援者一覧', icon: FaListUl },
+    ],
+  },
   { href: '/funds-results', label: '資金・成果', icon: RiMoneyCnyCircleLine },
   { href: '/logout', label: 'ログアウト', icon: RiLogoutCircleRLine }
 ]
