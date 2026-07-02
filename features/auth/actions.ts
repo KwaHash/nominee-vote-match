@@ -40,6 +40,13 @@ export async function signUp(username: string, email: string, password: string) 
     },
   })
 
+  if (!error && data.user && data.user.identities?.length === 0) {
+    return {
+      data: null,
+      error: new Error('このメールアドレスはすでに登録されています'),
+    }
+  }
+
   return { data, error }
 }
 
