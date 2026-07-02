@@ -1,33 +1,43 @@
+'use server'
+
+import { revalidatePath } from 'next/cache'
+import { redirect } from 'next/navigation'
 import { env } from '@/lib/config'
-import { createClient } from '@/utils/supabase/client'
+import { createSupabaseServerClient } from '@/utils/supabase/server'
 
 // login with google
 export async function logInWithGoogle() {
-  const supabase = createClient()
-  const { error } = await supabase.auth.signInWithOAuth({
+  const supabase = createSupabaseServerClient()
+  const { data, error } = await supabase.auth.signInWithOAuth({
     provider: 'google',
     options: {
       redirectTo: `${env.NEXT_PUBLIC_HOST}/api/auth/callback`,
     },
   })
 
-  return { error }
+  if (error || !data.url) {
+    return { error: error?.message ?? 'Googleログインに失敗しました' }
+  }
+
+  redirect(data.url)
 }
 
 // login with email and password
 export async function logInWithPassword(email: string, password: string) {
-  const supabase = createClient()
-  const { data, error } = await supabase.auth.signInWithPassword({
-    email,
-    password,
-  })
+  const supabase = createSupabaseServerClient()
+  const { error } = await supabase.auth.signInWithPassword({ email, password })
 
-  return { data, error }
+  if (error) {
+    return { error: error.message }
+  }
+
+  revalidatePath('/', 'layout')
+  redirect('/')
 }
 
 // sign-up (new user registration)
 export async function signUp(username: string, email: string, password: string) {
-  const supabase = createClient()
+  const supabase = createSupabaseServerClient()
 
   const { data, error } = await supabase.auth.signUp({
     email,
@@ -40,32 +50,33 @@ export async function signUp(username: string, email: string, password: string) 
     },
   })
 
-  if (!error && data.user && data.user.identities?.length === 0) {
-    return {
-      data: null,
-      error: new Error('このメールアドレスはすでに登録されています'),
-    }
+  if (error) {
+    return { error: error.message }
   }
 
-  return { data, error }
+  if (data.user && data.user.identities?.length === 0) {
+    return { error: 'このメールアドレスはすでに登録されています' }
+  }
+
+  return { error: null }
 }
 
-// reset password
+// reset password (uses the recovery session established from the email link)
 export async function resetPassword(newPassword: string) {
-  const supabase = createClient()
-  const { data, error } = await supabase.auth.updateUser({
+  const supabase = createSupabaseServerClient()
+  const { error } = await supabase.auth.updateUser({
     password: newPassword,
   })
 
-  return { data, error }
+  return { error: error?.message ?? null }
 }
 
 // forgot password (sends the reset email)
 export async function forgotPassword(email: string) {
-  const supabase = createClient()
-  const { data, error } = await supabase.auth.resetPasswordForEmail(email, {
+  const supabase = createSupabaseServerClient()
+  const { error } = await supabase.auth.resetPasswordForEmail(email, {
     redirectTo: `${env.NEXT_PUBLIC_HOST}/reset-password`,
   })
 
-  return { data, error }
+  return { error: error?.message ?? null }
 }

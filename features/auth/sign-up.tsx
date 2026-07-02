@@ -47,7 +47,7 @@ export default function SignUpPage() {
       const { email, password, username } = data
       const { error } = await signUp(username, email, password)
       if (error) {
-        setErrorMessage(error.message || 'アカウント作成に失敗しました')
+        setErrorMessage(error || 'アカウント作成に失敗しました')
         return
       }
       setSuccessMessage('アカウントが作成されました。メールを確認してください')
@@ -68,11 +68,9 @@ export default function SignUpPage() {
     setIsLoading(true)
 
     try {
-      const { error } = await logInWithGoogle()
-
-      if (error) {
-        setErrorMessage(error.message || 'Googleサインアップに失敗しました')
-        return
+      const result = await logInWithGoogle()
+      if (result?.error) {
+        setErrorMessage(result.error || 'Googleサインアップに失敗しました')
       }
     } catch (error) {
       if (error instanceof Error) {

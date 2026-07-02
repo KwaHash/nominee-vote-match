@@ -4,7 +4,6 @@ import { useState } from 'react'
 import { yupResolver } from '@hookform/resolvers/yup'
 import Image from 'next/image'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
 import { useForm } from 'react-hook-form'
 import { AiOutlineQuestionCircle } from 'react-icons/ai'
 import { FcGoogle } from 'react-icons/fc'
@@ -16,7 +15,6 @@ import InputField from '@/components/input/input-field'
 import RequiredLabel from '@/components/label/required-label'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
-import { useAuth } from '@/providers/auth-provider'
 
 interface ILogInForm {
   email: string;
@@ -24,8 +22,6 @@ interface ILogInForm {
 }
 
 export default function LogInPage() {
-  const router = useRouter()
-  const { updateAuthState } = useAuth()
   const [errorMessage, setErrorMessage] = useState<string>('')
   const [isLoading, setIsLoading] = useState<boolean>(false)
 
@@ -47,23 +43,16 @@ export default function LogInPage() {
 
     try {
       const { email, password } = data
-      const { data: { user }, error } = await logInWithPassword(email, password)
-      if (error) {
-        if (error.message.includes('Invalid login credentials')) {
+      const result = await logInWithPassword(email, password)
+      if (result?.error) {
+        if (result.error.includes('Invalid login credentials')) {
           setErrorMessage('メールアドレスまたはパスワードが正しくありません')
-        } else if (error.message.includes('Email not confirmed')) {
+        } else if (result.error.includes('Email not confirmed')) {
           setErrorMessage('メールアドレスが確認されていません。メールを確認してください。')
         } else {
-          setErrorMessage(error.message || 'ログインに失敗しました')
+          setErrorMessage(result.error || 'ログインに失敗しました')
         }
-        return
       }
-      updateAuthState({ 
-        user_id: user?.id as string,
-        user_name: user?.user_metadata.display_name as string,
-        user_email: user?.email as string,
-      })
-      window.location.href = '/'
     } catch (error) {
       if (error instanceof Error) {
         setErrorMessage(error.message || 'ログイン中にエラーが発生しました')
@@ -81,11 +70,9 @@ export default function LogInPage() {
     setIsLoading(true)
 
     try {
-      const { error } = await logInWithGoogle()
-
-      if (error) {
-        setErrorMessage(error.message || 'Googleサインアップに失敗しました')
-        return
+      const result = await logInWithGoogle()
+      if (result?.error) {
+        setErrorMessage(result.error || 'Googleサインアップに失敗しました')
       }
     } catch (error) {
       if (error instanceof Error) {
