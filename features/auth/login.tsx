@@ -63,8 +63,7 @@ export default function LogInPage() {
         user_name: user?.user_metadata.display_name as string,
         user_email: user?.email as string,
       })
-      router.refresh()
-      router.push('/')
+      window.location.href = '/'
     } catch (error) {
       if (error instanceof Error) {
         setErrorMessage(error.message || 'ログイン中にエラーが発生しました')
