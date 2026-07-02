@@ -1,13 +1,11 @@
 'use server'
 
-import { createClient } from '@/utils/supabase/server'
+import { createSupabaseServerClient } from '@/utils/supabase/server'
 
 export async function getUser() {
-  const supabase = createClient()
+  const supabase = createSupabaseServerClient()
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
+  const { data: { user } } = await supabase.auth.getUser()
 
   return user
 }
