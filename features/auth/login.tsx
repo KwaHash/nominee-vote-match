@@ -63,6 +63,7 @@ export default function LogInPage() {
         user_name: user?.user_metadata.display_name as string,
         user_email: user?.email as string,
       })
+      router.refresh()
       router.push('/')
     } catch (error) {
       if (error instanceof Error) {
