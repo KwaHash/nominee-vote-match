@@ -6,14 +6,14 @@ export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url)
   const code = searchParams.get('code')
 
+  const nextParam = searchParams.get('next')
+  const next = nextParam && nextParam.startsWith('/') && !nextParam.startsWith('//') ? nextParam : '/'
+
   if (code) {
     const supabaseClient = createSupabaseServerClient()
     const { error } = await supabaseClient.auth.exchangeCodeForSession(code)
     if (!error) {
-      const { data: { user } } = await supabaseClient.auth.getUser()
-      if (user) {
-        return NextResponse.redirect(`${env.NEXT_PUBLIC_HOST}`)
-      }
+      return NextResponse.redirect(`${env.NEXT_PUBLIC_HOST}${next}`)
     }
   }
 
