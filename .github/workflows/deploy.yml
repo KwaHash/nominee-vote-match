@@ -54,6 +54,7 @@ jobs:
           cp tailwind.config.ts deploy/
           cp postcss.config.mjs deploy/
           cp components.json deploy/
+          cp middleware.ts deploy/
           tar -czf deploy.tar.gz -C deploy .
 
       - name: Deploy to server
@@ -79,7 +80,7 @@ jobs:
             # Backup current deployment
             if [ -d ".next" ]; then
               echo "Backing up current deployment..."
-              tar -czf backup-$(date +%Y%m%d-%H%M%S).tar.gz .next public app components features hooks lib providers styles types utils package.json package-lock.json next.config.mjs tsconfig.json tailwind.config.ts postcss.config.mjs components.json 2>/dev/null || true
+              tar -czf backup-$(date +%Y%m%d-%H%M%S).tar.gz .next public app components features hooks lib providers styles types utils package.json package-lock.json next.config.mjs tsconfig.json tailwind.config.ts postcss.config.mjs components.json middleware.ts 2>/dev/null || true
             fi
 
             # Extract new deployment

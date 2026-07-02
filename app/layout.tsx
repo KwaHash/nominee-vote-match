@@ -6,6 +6,8 @@ import Providers from '@/app/providers'
 import ScrollTopButton from '@/components/scroll-top-button'
 import TailwindIndicator from '@/components/tailwind-indicator'
 import { notoSansJP } from '@/lib/fonts'
+import { type AuthState } from '@/providers/auth-provider'
+import { getUser } from '@/utils/supabase/user'
 
 export const viewport: Viewport = {
   themeColor: [
@@ -55,17 +57,24 @@ export const metadata: Metadata = {
   ],
 }
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const user = await getUser()
+  const initialAuthState: AuthState = {
+    user_id: user?.id ?? '',
+    user_email: user?.email ?? '',
+    user_name: (user?.user_metadata.display_name as string) ?? '',
+  }
+
   return (
     <StrictMode>
       <html lang='jp' suppressHydrationWarning>
       <body className={notoSansJP.className}>
         <HolyLoader color="#006BFF" height="1px" easing="linear" />
-        <Providers>
+        <Providers initialAuthState={initialAuthState}>
           <div className='flex flex-col w-full min-h-screen overflow-x-hidden overflow-y-auto'>
             {children}
             <ScrollTopButton />
