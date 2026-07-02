@@ -2,7 +2,6 @@
 
 import { useState } from 'react'
 import { yupResolver } from '@hookform/resolvers/yup'
-import axios from 'axios'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
@@ -17,7 +16,6 @@ import InputField from '@/components/input/input-field'
 import RequiredLabel from '@/components/label/required-label'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
-import { type AuthState } from '@/providers/auth-provider'
 import { useAuth } from '@/providers/auth-provider'
 
 interface ILogInForm {
@@ -49,7 +47,7 @@ export default function LogInPage() {
 
     try {
       const { email, password } = data
-      const { error } = await logInWithPassword(email, password)
+      const { data: { user }, error } = await logInWithPassword(email, password)
       if (error) {
         if (error.message.includes('Invalid login credentials')) {
           setErrorMessage('メールアドレスまたはパスワードが正しくありません')
@@ -60,9 +58,11 @@ export default function LogInPage() {
         }
         return
       }
-      const { data: { user } } = await axios.get<{ user: AuthState }>('/api/user')
-      updateAuthState({ ...user })
-      router.refresh()
+      updateAuthState({ 
+        user_id: user?.id as string,
+        user_name: user?.user_metadata.display_name as string,
+        user_email: user?.email as string,
+      })
       router.push('/')
     } catch (error) {
       if (error instanceof Error) {
