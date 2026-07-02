@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { yupResolver } from '@hookform/resolvers/yup'
+import axios from 'axios'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
@@ -16,6 +17,7 @@ import InputField from '@/components/input/input-field'
 import RequiredLabel from '@/components/label/required-label'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
+import { type AuthState } from '@/providers/auth-provider'
 import { useAuth } from '@/providers/auth-provider'
 
 interface ILogInForm {
@@ -26,7 +28,7 @@ interface ILogInForm {
 export default function LogInPage() {
   const router = useRouter()
   const { updateAuthState } = useAuth()
-  const [errorMessage, setErrorMessage] = useState<string | null>(null)
+  const [errorMessage, setErrorMessage] = useState<string>('')
   const [isLoading, setIsLoading] = useState<boolean>(false)
 
   const schema = yup.object().shape({
@@ -47,18 +49,18 @@ export default function LogInPage() {
 
     try {
       const { email, password } = data
-      const { user, error } = await logInWithPassword(email, password)
-      if (error || !user) {
-        if (error?.includes('Invalid login credentials')) {
+      const { error } = await logInWithPassword(email, password)
+      if (error) {
+        if (error.message.includes('Invalid login credentials')) {
           setErrorMessage('メールアドレスまたはパスワードが正しくありません')
-        } else if (error?.includes('Email not confirmed')) {
+        } else if (error.message.includes('Email not confirmed')) {
           setErrorMessage('メールアドレスが確認されていません。メールを確認してください。')
         } else {
-          setErrorMessage(error || 'ログインに失敗しました')
+          setErrorMessage(error.message || 'ログインに失敗しました')
         }
         return
       }
-
+      const { data: { user } } = await axios.get<{ user: AuthState }>('/api/user')
       updateAuthState({ ...user })
       router.refresh()
       router.push('/')
@@ -75,17 +77,16 @@ export default function LogInPage() {
 
   // Login with Google
   const handleGoogleSignIn = async () => {
-    setErrorMessage(null)
+    setErrorMessage('')
     setIsLoading(true)
 
     try {
       const { error } = await logInWithGoogle()
 
       if (error) {
-        setErrorMessage(error || 'Googleサインアップに失敗しました')
+        setErrorMessage(error.message || 'Googleサインアップに失敗しました')
         return
       }
-      // TODO: Redirect will be handled by the OAuth callback route.
     } catch (error) {
       if (error instanceof Error) {
         setErrorMessage(error.message || 'サインアップ中にエラーが発生しました')
