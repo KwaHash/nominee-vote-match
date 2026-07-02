@@ -44,7 +44,7 @@ const ResetPasswordPage = () => {
       const { password } = data
       const { error } = await resetPassword(password)
       if (error) {
-        setErrorMessage(error || 'パスワード再設定に失敗しました')
+        setErrorMessage(error.message || 'パスワード再設定に失敗しました')
         return
       }
 
