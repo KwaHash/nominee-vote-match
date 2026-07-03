@@ -1,5 +1,5 @@
 import PolicyStancePage from '@/features/main/policies/policy-stance'
 
-export default function page() {
+export default function Page() {
   return <PolicyStancePage />
 }
