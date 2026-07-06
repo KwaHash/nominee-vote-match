@@ -73,7 +73,7 @@ export default async function RootLayout({
     <StrictMode>
       <html lang='jp' suppressHydrationWarning>
       <body className={notoSansJP.className}>
-        <HolyLoader color="#006BFF" height="1px" easing="linear" />
+        <HolyLoader color="#16A34A" height="1px" easing="linear" />
         <Providers initialAuthState={initialAuthState}>
           <div className='flex flex-col w-full min-h-screen overflow-x-hidden overflow-y-auto'>
             {children}

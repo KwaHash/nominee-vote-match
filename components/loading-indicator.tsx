@@ -5,10 +5,10 @@ const Loading = () => {
   return (
     <div className="fixed w-full h-screen flex z-50 items-center justify-center bg-[#f9fafb] bg-opacity-80 inset-0">
       <div className="sm:hidden">
-        <OrbitProgress variant="dotted" color="#006BFF" size="medium" />
+        <OrbitProgress variant="dotted" color="#16A34A" size="medium" />
       </div>
       <div className="hidden sm:block">
-        <OrbitProgress variant="dotted" color="#006BFF" size="large" />
+        <OrbitProgress variant="dotted" color="#16A34A" size="large" />
       </div>
     </div>
   )
