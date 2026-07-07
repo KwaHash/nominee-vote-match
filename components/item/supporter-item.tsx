@@ -15,6 +15,12 @@ const regionChipClassName = 'bg-gray-100 text-gray-700'
 const typeChipClassName = 'bg-green-100 text-green-700'
 const interestChipClassName = 'bg-violet-100 text-violet-700'
 
+const MAX_LENGTH = 100
+
+// Cap free-text fields, appending an ellipsis when truncated.
+const truncate = (value: string) =>
+  value.length > MAX_LENGTH ? `${value.slice(0, MAX_LENGTH)}…` : value
+
 interface SupporterItemProps {
   supporter: Supporter
 }
@@ -25,7 +31,7 @@ const SupporterItem = ({ supporter }: SupporterItemProps) => {
       <div className="flex flex-col shrink-0 justify-center items-center w-[70px] border-r-[1px] border-[#ddd]">
         <StatusItem status={supporter.visibility} />
       </div>
-      <div className="flex flex-col p-5 gap-3">
+      <div className="flex flex-col p-5 gap-2">
         <div className="flex items-center gap-2">
           <h3 className='text-lg font-bold'>{supporter.name}</h3>
           <span className={cn(chipBaseClassName, kindChipClassName[supporter.kind])}>
@@ -41,7 +47,7 @@ const SupporterItem = ({ supporter }: SupporterItemProps) => {
           </div>
         )}
         {supporter.interests?.length > 0 && (
-          <div className='flex gap-2'>
+          <div className='flex gap-2 mb-2'>
             <div className='flex flex-wrap gap-2'>
               {supporter.interests.map((interest) => (
                 <span key={interest} className={cn(chipBaseClassName, interestChipClassName)}>{interest}</span>
@@ -49,13 +55,15 @@ const SupporterItem = ({ supporter }: SupporterItemProps) => {
             </div>
           </div>
         )}
-        {supporter.contact_note && (
-          <p className="text-sm text-[#EA9B54]">{supporter.contact_note}</p>
-        )}
+        <div className='flex flex-col gap-1'>
+          {supporter.contact_note && (
+            <p className="text-sm text-[#EA9B54]">{truncate(supporter.contact_note)}</p>
+          )}
 
-        {supporter.next_action && (
-          <p className="text-sm text-m-red">{supporter.next_action}</p>
-        )}
+          {supporter.next_action && (
+            <p className="text-sm text-m-red">{truncate(supporter.next_action)}</p>
+          )}
+        </div>
       </div>
       <div className="flex flex-col shrink-0 ml-auto pt-5 pr-3 gap-2 w-[100px]">
         <Link href={`/supporters/${supporter.id}`}
