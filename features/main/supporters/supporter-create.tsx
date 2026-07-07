@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { MdGroups } from 'react-icons/md'
 import { saveSupporter } from './actions'
 import MainHero from '@/components/main-hero'
@@ -18,10 +19,13 @@ import { type SupporterKind, type SupporterVisibility } from '@/types/supporter.
 
 const chipClassName = 'px-3 data-[state=on]:bg-green-600 data-[state=on]:text-white hover:bg-green-600 hover:text-white transition-colors duration-300 rounded-full'
 
+const sortByReference = (values: string[], order: readonly string[]) =>
+  [...values].sort((a, b) => order.indexOf(a) - order.indexOf(b))
+
 export default function SupporterCreatePage() {
+  const router = useRouter()
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState('')
-  const [success, setSuccess] = useState('')
 
   const [name, setName] = useState('')
   const [kind, setKind] = useState<SupporterKind>('個人')
@@ -46,7 +50,6 @@ export default function SupporterCreatePage() {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     setError('')
-    setSuccess('')
 
     const supporter = {
       name: name.trim(),
@@ -64,10 +67,10 @@ export default function SupporterCreatePage() {
     if (saveError) {
       setError(saveError)
     } else {
-      setSuccess('支援者を登録しました。')
       resetForm()
     }
     setIsSubmitting(false)
+    router.push('/supporters/list')
   }
 
   return (
@@ -128,7 +131,7 @@ export default function SupporterCreatePage() {
                 <ToggleGroup
                   type='multiple'
                   value={selectedSupportTypes}
-                  onValueChange={setSelectedSupportTypes}
+                  onValueChange={(values) => setSelectedSupportTypes(sortByReference(values, supportTypes))}
                   className='flex-wrap justify-start gap-2'
                 >
                   {supportTypes.map((t) => (
@@ -151,7 +154,7 @@ export default function SupporterCreatePage() {
                 <ToggleGroup
                   type='multiple'
                   value={interests}
-                  onValueChange={setInterests}
+                  onValueChange={(values) => setInterests(sortByReference(values, policyThemes))}
                   className='flex-wrap justify-start gap-2'
                 >
                   {policyThemes.map((theme) => (
@@ -234,9 +237,6 @@ export default function SupporterCreatePage() {
 
           {error && (
             <p className='bg-red-50 border-l-4 border-red-400 p-4 text-sm text-red-700'>{error}</p>
-          )}
-          {success && (
-            <p className='bg-green-50 border-l-4 border-green-400 p-4 text-sm text-green-700'>{success}</p>
           )}
 
           <div className='flex items-start'>
