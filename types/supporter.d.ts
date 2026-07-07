@@ -12,3 +12,18 @@ export interface SupporterForm {
   nextAction: string
   visibility: SupporterVisibility
 }
+
+export interface Supporter {
+  id: string
+  candidate_id: string
+  name: string
+  kind: SupporterKind
+  support_types: string[]
+  interests: string[]
+  region: string
+  visibility: SupporterVisibility
+  contact_note: string
+  next_action: string
+  created_at: string
+  updated_at: string
+}
