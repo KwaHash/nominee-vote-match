@@ -32,6 +32,7 @@ jobs:
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
           NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          NEXT_SERVER_ACTIONS_ENCRYPTION_KEY: ${{ secrets.NEXT_SERVER_ACTIONS_ENCRYPTION_KEY }}
 
       - name: Create deployment package
         run: |
@@ -94,7 +95,7 @@ jobs:
 
             # Restart PM2 application
             echo "Restarting PM2 application..."
-            pm2 restart nominee-vote-match-app || pm2 start npm --name "nominee-vote-match-app" -- start
+            pm2 restart nominee-vote-match-app --update-env || pm2 start npm --name "nominee-vote-match-app" -- start
 
             # Cleanup
             rm -f /tmp/deploy.tar.gz
