@@ -39,6 +39,7 @@ export default function SupporterListPage() {
     const fetchSupporters = async () => {
       try {
         const result = await getSupporters()
+        console.log('result', result)
         if (result?.error) {
           setError(result.error)
         } else {
