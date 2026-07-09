@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
 import { FaPlus } from 'react-icons/fa6'
-import { getSupporters } from './actions'
+import { getSupporters, deleteSupporter } from './actions'
 import SupporterItem from '@/components/item/supporter-item'
 import Loading from '@/components/loading-indicator'
 import MainHero from '@/components/main-hero'
@@ -13,6 +13,8 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { supportTypes, supporterKinds, visibilityOptions } from '@/constants/supporter.c'
+import { updateDeleteDialog } from '@/stores/dialogs/dialogs.slice'
+import { useAppDispatch } from '@/stores/store'
 import { type Supporter } from '@/types/supporter.d'
 
 const pageSizeOptions = [5, 10, 20, 50] as const
@@ -21,6 +23,7 @@ const kindOptions = ['すべて', ...supporterKinds] as const
 const visibilityFilterOptions = ['すべて', ...visibilityOptions] as const
 
 export default function SupporterListPage() {
+  const dispatch = useAppDispatch()
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState('')
   const [supporters, setSupporters] = useState<Supporter[]>([])
@@ -74,6 +77,24 @@ export default function SupporterListPage() {
   useEffect(() => {
     setCurrentPage(0)
   }, [keyword, supportType, kind, visibility, pageSize])
+
+  const handleDelete = (id: string) => {
+    dispatch(updateDeleteDialog({
+      isOpen: true,
+      title: '削除',
+      description: 'この支援者を削除しますか？',
+      onDelete: async () => {
+        setIsLoading(true)
+        const { error } = await deleteSupporter(id)
+        if (error) {
+          setError(error)
+        } else {
+          setSupporters((prev) => prev.filter((s) => s.id !== id))
+        }
+        setIsLoading(false)
+      }
+    }))
+  }
 
   const totalPages = Math.ceil(filtered.length / pageSize)
   const pageItems = filtered.slice(currentPage * pageSize, (currentPage + 1) * pageSize)
@@ -195,7 +216,11 @@ export default function SupporterListPage() {
 
             <div className='flex flex-col gap-3'>
               {pageItems.map((supporter) => (
-                <SupporterItem supporter={supporter} />
+                <SupporterItem
+                  key={supporter.id}
+                  supporter={supporter}
+                  handleDelete={handleDelete}
+                />
               ))}
             </div>
           </div>

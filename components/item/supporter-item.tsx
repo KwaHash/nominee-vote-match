@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { FaPencilAlt, FaTrashAlt } from 'react-icons/fa'
 import StatusItem from './status-item'
+import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { type Supporter, type SupporterKind } from '@/types/supporter.d'
 
@@ -23,9 +24,10 @@ const truncate = (value: string) =>
 
 interface SupporterItemProps {
   supporter: Supporter
+  handleDelete: (id: string) => void
 }
 
-const SupporterItem = ({ supporter }: SupporterItemProps) => {
+const SupporterItem = ({ supporter, handleDelete }: SupporterItemProps) => {
   return (
     <div className="w-full flex border-[1px] border-[#ddd]">
       <div className="flex flex-col shrink-0 justify-center items-center w-[70px] border-r-[1px] border-[#ddd]">
@@ -72,10 +74,12 @@ const SupporterItem = ({ supporter }: SupporterItemProps) => {
           <FaPencilAlt className="text-sm mr-1" />
           <span className="text-sm">編集</span>
         </Link>
-        <div className="flex items-center justify-center py-1.5 rounded-[1px] text-sm bg-m-red text-white hover:opacity-90 transition-all duration-300">
+        <Button onClick={() => handleDelete(supporter.id)}
+          className="flex items-center justify-center h-auto py-1.5 rounded-[1px] text-sm bg-m-red hover:bg-m-hover-red text-white hover:opacity-90 transition-all duration-300"
+        >
           <FaTrashAlt className="text-sm mr-1" />
           <span className="text-sm">削除</span>
-        </div>
+        </Button>
       </div>
     </div>
   )
