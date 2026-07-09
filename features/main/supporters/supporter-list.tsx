@@ -37,14 +37,18 @@ export default function SupporterListPage() {
 
   useEffect(() => {
     const fetchSupporters = async () => {
-      const { data, error: fetchError } = await getSupporters()
-      console.log('data', data)
-      if (fetchError) {
-        setError(fetchError)
-      } else {
-        setSupporters(data)
+      try {
+        const result = await getSupporters()
+        if (result?.error) {
+          setError(result.error)
+        } else {
+          setSupporters(result?.data ?? [])
+        }
+      } catch {
+        setError('支援者の取得に失敗しました。')
+      } finally {
+        setIsLoading(false)
       }
-      setIsLoading(false)
     }
 
     void fetchSupporters()
