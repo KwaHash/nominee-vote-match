@@ -44,22 +44,28 @@ export default function SupporterEditPage({ id }: { id: string }) {
   useEffect(() => {
     const fetchSupporter = async () => {
       setIsLoading(true)
-      const { data, error: fetchError } = await getSupporter(id)
-      if (fetchError) {
-        setError(fetchError)
-      } else if (!data) {
-        setNotFound(true)
-      } else {
-        setName(data.name)
-        setKind(data.kind)
-        setSelectedSupportTypes(sortByReference(data.support_types ?? [], supportTypes))
-        setInterests(sortByReference(data.interests ?? [], policyThemes))
-        setRegion(data.region)
-        setContactNote(data.contact_note)
-        setNextAction(data.next_action)
-        setVisibility(data.visibility)
+      try {
+        const result = await getSupporter(id)
+        const data = result?.data
+        if (result?.error) {
+          setError(result.error)
+        } else if (!data) {
+          setNotFound(true)
+        } else {
+          setName(data.name)
+          setKind(data.kind)
+          setSelectedSupportTypes(sortByReference(data.support_types ?? [], supportTypes))
+          setInterests(sortByReference(data.interests ?? [], policyThemes))
+          setRegion(data.region)
+          setContactNote(data.contact_note)
+          setNextAction(data.next_action)
+          setVisibility(data.visibility)
+        }
+      } catch {
+        setError('支援者の取得に失敗しました。')
+      } finally {
+        setIsLoading(false)
       }
-      setIsLoading(false)
     }
 
     void fetchSupporter()
