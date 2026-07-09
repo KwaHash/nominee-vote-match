@@ -118,3 +118,25 @@ export async function updateSupporter(
 
   return { error: null }
 }
+
+// Delete a supporter owned by the current candidate.
+export async function deleteSupporter(id: string): Promise<{ error: string | null }> {
+  const supabase = createSupabaseServerClient()
+  const { data: { user } } = await supabase.auth.getUser()
+
+  if (!user) {
+    return { error: '認証が必要です。' }
+  }
+
+  const { error } = await supabase
+    .from('candidate_supporters')
+    .delete()
+    .eq('candidate_id', user.id)
+    .eq('id', id)
+
+  if (error) {
+    return { error: error.message }
+  }
+
+  return { error: null }
+}
