@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { ThemeProvider } from 'next-themes'
 import { TooltipProvider } from '@/components/ui/tooltip'
 import { AuthProvider, type AuthState } from '@/providers/auth-provider'
+import ReduxProvider from '@/providers/redux-provider'
 
 export default function Providers({
   initialAuthState,
@@ -27,7 +28,9 @@ export default function Providers({
       <ThemeProvider attribute='class' defaultTheme='light' enableSystem>
         <AuthProvider initialState={initialAuthState}>
           <TooltipProvider>
-            {children}
+            <ReduxProvider>
+              {children}
+            </ReduxProvider>
           </TooltipProvider>
         </AuthProvider>
       </ThemeProvider>

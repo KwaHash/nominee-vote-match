@@ -3,6 +3,7 @@ import { StrictMode } from 'react'
 import HolyLoader from 'holy-loader'
 import { type Metadata, type Viewport } from 'next'
 import Providers from '@/app/providers'
+import DeleteConfirmationDialog from '@/components/dialog/delete-confirmation-dialog'
 import ScrollTopButton from '@/components/scroll-top-button'
 import TailwindIndicator from '@/components/tailwind-indicator'
 import { notoSansJP } from '@/lib/fonts'
@@ -80,6 +81,7 @@ export default async function RootLayout({
             <ScrollTopButton />
           </div>
           <TailwindIndicator />
+          <DeleteConfirmationDialog />
         </Providers>        
       </body>
     </html>
