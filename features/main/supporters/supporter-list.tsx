@@ -54,6 +54,8 @@ export default function SupporterListPage() {
     void fetchSupporters()
   }, [])
 
+  console.log('supporters', supporters)
+
   const filtered = useMemo(() => {
     const trimmed = keyword.trim()
     return supporters.filter((supporter) => {
