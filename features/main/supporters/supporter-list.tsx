@@ -37,8 +37,8 @@ export default function SupporterListPage() {
 
   useEffect(() => {
     const fetchSupporters = async () => {
-      setIsLoading(true)
       const { data, error: fetchError } = await getSupporters()
+      console.log('data', data)
       if (fetchError) {
         setError(fetchError)
       } else {
