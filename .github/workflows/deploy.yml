@@ -85,6 +85,11 @@ jobs:
               tar -czf backup-$(date +%Y%m%d-%H%M%S).tar.gz .next public app components features hooks lib providers stores styles types utils package.json package-lock.json next.config.mjs tsconfig.json tailwind.config.ts postcss.config.mjs components.json middleware.ts 2>/dev/null || true
             fi
 
+            # Remove the old build so the server never serves a mix of two
+            # builds (stale Server Action IDs -> "Failed to find Server Action")
+            echo "Removing old .next build..."
+            rm -rf .next
+
             # Extract new deployment
             echo "Extracting new deployment..."
             tar -xzf /tmp/deploy.tar.gz -C /var/www/nominee-vote-match
