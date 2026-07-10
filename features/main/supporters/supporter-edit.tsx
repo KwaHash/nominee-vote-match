@@ -1,11 +1,11 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import axios from 'axios'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { FaChevronLeft } from 'react-icons/fa'
 import { MdGroups } from 'react-icons/md'
-import { getSupporter, updateSupporter } from './actions'
 import Loading from '@/components/loading-indicator'
 import MainHero from '@/components/main-hero'
 import { Button } from '@/components/ui/button'
@@ -18,7 +18,7 @@ import {
 import { Textarea } from '@/components/ui/textarea'
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
 import { policyThemes, supportTypes, supporterKinds, visibilityOptions } from '@/constants/supporter.c'
-import { type SupporterKind, type SupporterVisibility } from '@/types/supporter.d'
+import { type Supporter, type SupporterKind, type SupporterVisibility } from '@/types/supporter.d'
 
 const chipClassName = 'px-3 data-[state=on]:bg-green-600 data-[state=on]:text-white hover:bg-green-600 hover:text-white transition-colors duration-300 rounded-full'
 
@@ -45,24 +45,25 @@ export default function SupporterEditPage({ id }: { id: string }) {
     const fetchSupporter = async () => {
       setIsLoading(true)
       try {
-        const result = await getSupporter(id)
-        const data = result?.data
-        if (result?.error) {
-          setError(result.error)
-        } else if (!data) {
+        const { data } = await axios.get<{ supporter: Supporter | null }>(`/api/supporters/${id}`)
+        const supporter = data.supporter
+        if (!supporter) {
           setNotFound(true)
         } else {
-          setName(data.name)
-          setKind(data.kind)
-          setSelectedSupportTypes(sortByReference(data.support_types ?? [], supportTypes))
-          setInterests(sortByReference(data.interests ?? [], policyThemes))
-          setRegion(data.region)
-          setContactNote(data.contact_note)
-          setNextAction(data.next_action)
-          setVisibility(data.visibility)
+          setName(supporter.name)
+          setKind(supporter.kind)
+          setSelectedSupportTypes(sortByReference(supporter.support_types ?? [], supportTypes))
+          setInterests(sortByReference(supporter.interests ?? [], policyThemes))
+          setRegion(supporter.region)
+          setContactNote(supporter.contact_note)
+          setNextAction(supporter.next_action)
+          setVisibility(supporter.visibility)
         }
-      } catch {
-        setError('支援者の取得に失敗しました。')
+      } catch (err) {
+        const message = axios.isAxiosError<{ error?: string }>(err)
+          ? err.response?.data?.error ?? '支援者の取得に失敗しました。'
+          : '支援者の取得に失敗しました。'
+        setError(message)
       } finally {
         setIsLoading(false)
       }
@@ -87,9 +88,13 @@ export default function SupporterEditPage({ id }: { id: string }) {
     }
 
     setIsSubmitting(true)
-    const { error: updateError } = await updateSupporter(id, supporter)
-    if (updateError) {
-      setError(updateError)
+    try {
+      await axios.put(`/api/supporters/${id}`, supporter)
+    } catch (err) {
+      const message = axios.isAxiosError<{ error?: string }>(err)
+        ? err.response?.data?.error ?? '支援者の更新に失敗しました。'
+        : '支援者の更新に失敗しました。'
+      setError(message)
     }
     setIsSubmitting(false)
     router.push('/supporters/list')

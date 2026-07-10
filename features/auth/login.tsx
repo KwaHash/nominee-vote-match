@@ -2,15 +2,16 @@
 
 import { useState } from 'react'
 import { yupResolver } from '@hookform/resolvers/yup'
+import axios from 'axios'
 import Image from 'next/image'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { useForm } from 'react-hook-form'
 import { AiOutlineQuestionCircle } from 'react-icons/ai'
 import { FcGoogle } from 'react-icons/fc'
 import { FiLock, FiMail } from 'react-icons/fi'
 import { HiMiniArrowRightStartOnRectangle } from 'react-icons/hi2'
 import * as yup from 'yup'
-import { logInWithGoogle, logInWithPassword } from './actions'
 import InputField from '@/components/input/input-field'
 import RequiredLabel from '@/components/label/required-label'
 import { Button } from '@/components/ui/button'
@@ -22,6 +23,7 @@ interface ILogInForm {
 }
 
 export default function LogInPage() {
+  const router = useRouter()
   const [errorMessage, setErrorMessage] = useState<string>('')
   const [isLoading, setIsLoading] = useState<boolean>(false)
 
@@ -43,21 +45,19 @@ export default function LogInPage() {
 
     try {
       const { email, password } = data
-      const result = await logInWithPassword(email, password)
-      if (result?.error) {
-        if (result.error.includes('Invalid login credentials')) {
-          setErrorMessage('メールアドレスまたはパスワードが正しくありません')
-        } else if (result.error.includes('Email not confirmed')) {
-          setErrorMessage('メールアドレスが確認されていません。メールを確認してください。')
-        } else {
-          setErrorMessage(result.error || 'ログインに失敗しました')
-        }
-      }
+      await axios.post('/api/auth/login', { email, password })
+      router.push('/')
+      router.refresh()
     } catch (error) {
-      if (error instanceof Error) {
-        setErrorMessage(error.message || 'ログイン中にエラーが発生しました')
+      const message = axios.isAxiosError<{ error?: string }>(error)
+        ? error.response?.data?.error
+        : undefined
+      if (message?.includes('Invalid login credentials')) {
+        setErrorMessage('メールアドレスまたはパスワードが正しくありません')
+      } else if (message?.includes('Email not confirmed')) {
+        setErrorMessage('メールアドレスが確認されていません。メールを確認してください。')
       } else {
-        setErrorMessage('ログイン中にエラーが発生しました')
+        setErrorMessage(message || 'ログインに失敗しました')
       }
     } finally {
       setIsLoading(false)
@@ -70,17 +70,13 @@ export default function LogInPage() {
     setIsLoading(true)
 
     try {
-      const result = await logInWithGoogle()
-      if (result?.error) {
-        setErrorMessage(result.error || 'Googleサインアップに失敗しました')
-      }
+      const { data } = await axios.post<{ url: string }>('/api/auth/google')
+      window.location.href = data.url
     } catch (error) {
-      if (error instanceof Error) {
-        setErrorMessage(error.message || 'サインアップ中にエラーが発生しました')
-      } else {
-        setErrorMessage('サインアップ中にエラーが発生しました')
-      }
-    } finally {
+      const message = axios.isAxiosError<{ error?: string }>(error)
+        ? error.response?.data?.error
+        : undefined
+      setErrorMessage(message || 'Googleサインアップに失敗しました')
       setIsLoading(false)
     }
   }

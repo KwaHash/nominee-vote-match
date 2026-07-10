@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { yupResolver } from '@hookform/resolvers/yup'
+import axios from 'axios'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useForm } from 'react-hook-form'
@@ -9,7 +10,6 @@ import { FcGoogle } from 'react-icons/fc'
 import { FiLock, FiMail, FiUser } from 'react-icons/fi'
 import { HiMiniArrowRightStartOnRectangle } from 'react-icons/hi2'
 import * as yup from 'yup'
-import { signUp , logInWithGoogle } from './actions'
 import InputField from '@/components/input/input-field'
 import RequiredLabel from '@/components/label/required-label'
 import { Button } from '@/components/ui/button'
@@ -45,18 +45,13 @@ export default function SignUpPage() {
 
     try {
       const { email, password, username } = data
-      const { error } = await signUp(username, email, password)
-      if (error) {
-        setErrorMessage(error || 'アカウント作成に失敗しました')
-        return
-      }
+      await axios.post('/api/auth/sign-up', { username, email, password })
       setSuccessMessage('アカウントが作成されました。メールを確認してください')
     } catch (error) {
-      if (error instanceof Error) {
-        setErrorMessage(error.message || 'アカウント作成中にエラーが発生しました')
-      } else {
-        setErrorMessage('アカウント作成中にエラーが発生しました')
-      }
+      const message = axios.isAxiosError<{ error?: string }>(error)
+        ? error.response?.data?.error
+        : undefined
+      setErrorMessage(message || 'アカウント作成に失敗しました')
     } finally {
       setIsLoading(false)
     }
@@ -68,17 +63,13 @@ export default function SignUpPage() {
     setIsLoading(true)
 
     try {
-      const result = await logInWithGoogle()
-      if (result?.error) {
-        setErrorMessage(result.error || 'Googleサインアップに失敗しました')
-      }
+      const { data } = await axios.post<{ url: string }>('/api/auth/google')
+      window.location.href = data.url
     } catch (error) {
-      if (error instanceof Error) {
-        setErrorMessage(error.message || 'サインアップ中にエラーが発生しました')
-      } else {
-        setErrorMessage('サインアップ中にエラーが発生しました')
-      }
-    } finally {
+      const message = axios.isAxiosError<{ error?: string }>(error)
+        ? error.response?.data?.error
+        : undefined
+      setErrorMessage(message || 'Googleサインアップに失敗しました')
       setIsLoading(false)
     }
   }

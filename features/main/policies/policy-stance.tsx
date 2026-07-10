@@ -1,9 +1,9 @@
 'use client'
 
 import { useEffect, useMemo, useState } from 'react'
+import axios from 'axios'
 import { FaCheck } from 'react-icons/fa6'
 import { MdPolicy } from 'react-icons/md'
-import { getPolicyStance, savePolicyStance } from './actions'
 import LoadingIndicator from '@/components/loading-indicator'
 import MainHero from '@/components/main-hero'
 import { Button } from '@/components/ui/button'
@@ -33,25 +33,30 @@ const PolicyStancePage = () => {
   useEffect(() => {
     const fetchPolicyStance = async () => {
       setIsLoading(true)
-      const { policyStances, error: fetchError } = await getPolicyStance()
-
-      if (fetchError) {
-        setError(fetchError)
-      } else if (policyStances.length) {
-        setQuestionAnswers(
-          policyQuestions.map((q) => {
-            const entry = policyStances.find((a) => a.question === q.question)
-            return {
-              question: q.question,
-              answer: entry?.answer ?? '',
-              importance: entry?.importance ?? '',
-              evidence_url: entry?.evidence_url ?? '',
-              note: entry?.note ?? '',
-            }
-          })
-        )
+      try {
+        const { data } = await axios.get<{ policyStances: PolicyQuestionAnswer[] }>('/api/policy-stance')
+        if (data.policyStances.length) {
+          setQuestionAnswers(
+            policyQuestions.map((q) => {
+              const entry = data.policyStances.find((a) => a.question === q.question)
+              return {
+                question: q.question,
+                answer: entry?.answer ?? '',
+                importance: entry?.importance ?? '',
+                evidence_url: entry?.evidence_url ?? '',
+                note: entry?.note ?? '',
+              }
+            })
+          )
+        }
+      } catch (err) {
+        const message = axios.isAxiosError<{ error?: string }>(err)
+          ? err.response?.data?.error ?? '政策の取得に失敗しました。'
+          : '政策の取得に失敗しました。'
+        setError(message)
+      } finally {
+        setIsLoading(false)
       }
-      setIsLoading(false)
     }
 
     void fetchPolicyStance()
@@ -73,11 +78,14 @@ const PolicyStancePage = () => {
       }))
 
     setIsSubmitting(true)
-    const { error: saveError } = await savePolicyStance(answeredQuestions)
-    if (saveError) {
-      setError(saveError)
-    } else {
+    try {
+      await axios.put('/api/policy-stance', { policyStances: answeredQuestions })
       setSuccess('政策を保存しました。')
+    } catch (err) {
+      const message = axios.isAxiosError<{ error?: string }>(err)
+        ? err.response?.data?.error ?? '政策の保存に失敗しました。'
+        : '政策の保存に失敗しました。'
+      setError(message)
     }
     setIsSubmitting(false)
   }

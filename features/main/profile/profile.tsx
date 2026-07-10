@@ -25,7 +25,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/components/ui/textarea'
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
 import { ELECTION_LEVELS, parties, POSITION_OPTIONS, WEBSITE_LINK_LABELS, WEBSITE_FIELD_LABELS } from '@/constants/profile.c'
-import { getProfile, saveProfile } from '@/features/main/profile/actions'
 import { cn } from '@/lib/utils'
 import {
   type AchievementEntry, type CustomItemEntry, type ICandidateProfile,
@@ -175,17 +174,23 @@ const ProfilePage = () => {
 
   useEffect(() => {
     const fetchProfile = async () => {
-      const { profile, error: fetchError } = await getProfile()
-      if (fetchError) {
-        setError(fetchError)
-      } else if (profile) {
-        reset(profileToFormValues(profile))
-        setAvatarFileName(null)
-        setAchievements(achievementsFromProfile(profile.achievements))
-        setWebsiteLinks(websiteLinksFromProfile(profile.website))
-        setCustomItems(customItemsFromProfile(profile.custom_items))
+      try {
+        const { data } = await axios.get<{ profile: ICandidateProfile | null }>('/api/profile')
+        if (data.profile) {
+          reset(profileToFormValues(data.profile))
+          setAvatarFileName(null)
+          setAchievements(achievementsFromProfile(data.profile.achievements))
+          setWebsiteLinks(websiteLinksFromProfile(data.profile.website))
+          setCustomItems(customItemsFromProfile(data.profile.custom_items))
+        }
+      } catch (err) {
+        const message = axios.isAxiosError<{ error?: string }>(err)
+          ? err.response?.data?.error ?? 'プロフィールの取得に失敗しました。'
+          : 'プロフィールの取得に失敗しました。'
+        setError(message)
+      } finally {
+        setIsLoading(false)
       }
-      setIsLoading(false)
     }
 
     void fetchProfile()
@@ -208,9 +213,13 @@ const ProfilePage = () => {
     }
 
     const payload = formToProfilePayload(data, websiteLinks, customItems, achievements)
-    const { error: saveError } = await saveProfile(payload)
-    if (saveError) {
-      setError(saveError)
+    try {
+      await axios.put('/api/profile', payload)
+    } catch (err) {
+      const message = axios.isAxiosError<{ error?: string }>(err)
+        ? err.response?.data?.error ?? 'プロフィールの保存に失敗しました。'
+        : 'プロフィールの保存に失敗しました。'
+      setError(message)
       return
     }
     setSuccess('プロフィールを保存しました。')

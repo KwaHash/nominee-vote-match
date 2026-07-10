@@ -1,18 +1,18 @@
-'use server'
-
+import { NextResponse, type NextRequest } from 'next/server'
 import { type PolicyQuestionAnswer } from '@/types/policy.d'
 import { createSupabaseServerClient } from '@/utils/supabase/server'
 
+export const runtime = 'nodejs'
+
 // Load the current user's saved policy stances (empty array if none yet).
-export async function getPolicyStance(): Promise<{
-  policyStances: PolicyQuestionAnswer[];
-  error: string | null;
-}> {
+export async function GET() {
   const supabase = createSupabaseServerClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
 
   if (!user) {
-    return { policyStances: [], error: '認証が必要です。' }
+    return NextResponse.json({ error: '認証が必要です。' }, { status: 401 })
   }
 
   const { data, error } = await supabase
@@ -22,27 +22,26 @@ export async function getPolicyStance(): Promise<{
     .maybeSingle()
 
   if (error) {
-    return { policyStances: [], error: error.message }
+    return NextResponse.json({ error: error.message }, { status: 500 })
   }
 
-  return {
+  return NextResponse.json({
     policyStances: (data?.policy_stances as PolicyQuestionAnswer[]) ?? [],
-    error: null,
-  }
+  })
 }
 
 // Upsert the current user's policy stances (one row per candidate).
-export async function savePolicyStance(
-  policyStances: PolicyQuestionAnswer[]
-): Promise<{ error: string | null }> {
+export async function PUT(req: NextRequest) {
   const supabase = createSupabaseServerClient()
   const {
     data: { user },
   } = await supabase.auth.getUser()
 
   if (!user) {
-    return { error: '認証が必要です。' }
+    return NextResponse.json({ error: '認証が必要です。' }, { status: 401 })
   }
+
+  const { policyStances } = (await req.json()) as { policyStances: PolicyQuestionAnswer[] }
 
   const { error } = await supabase
     .from('candidate_policy_stances')
@@ -50,10 +49,10 @@ export async function savePolicyStance(
       { candidate_id: user.id, policy_stances: policyStances },
       { onConflict: 'candidate_id' }
     )
-  
+
   if (error) {
-    return { error: error.message }
+    return NextResponse.json({ error: error.message }, { status: 500 })
   }
 
-  return { error: null }
+  return NextResponse.json({})
 }

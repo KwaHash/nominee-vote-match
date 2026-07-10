@@ -1,9 +1,9 @@
 'use client'
 
 import { useState } from 'react'
+import axios from 'axios'
 import { useRouter } from 'next/navigation'
 import { MdGroups } from 'react-icons/md'
-import { saveSupporter } from './actions'
 import MainHero from '@/components/main-hero'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -63,11 +63,14 @@ export default function SupporterCreatePage() {
     }
 
     setIsSubmitting(true)
-    const { error: saveError } = await saveSupporter(supporter)
-    if (saveError) {
-      setError(saveError)
-    } else {
+    try {
+      await axios.post('/api/supporters', supporter)
       resetForm()
+    } catch (err) {
+      const message = axios.isAxiosError<{ error?: string }>(err)
+        ? err.response?.data?.error ?? '支援者の登録に失敗しました。'
+        : '支援者の登録に失敗しました。'
+      setError(message)
     }
     setIsSubmitting(false)
     router.push('/supporters/list')
