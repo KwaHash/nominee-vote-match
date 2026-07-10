@@ -1,5 +1,6 @@
 import  { type IconType } from 'react-icons'
 import { FaRobot, FaListUl, FaRegRegistered } from 'react-icons/fa'
+import { GiExpense } from 'react-icons/gi'
 import { MdPolicy } from 'react-icons/md'
 import { RiBook2Line, RiMoneyCnyCircleLine, RiRobot2Line, RiSendPlaneLine, RiUserStarLine , RiLogoutCircleRLine} from 'react-icons/ri'
 
@@ -39,6 +40,12 @@ export const navItems: NavEntry[] = [
       { href: '/supporters/list', label: '支援者一覧', icon: FaListUl },
     ],
   },
-  { href: '/funds-results', label: '資金・成果', icon: RiMoneyCnyCircleLine },
+  {
+    label: '資金・成果',
+    icon: RiMoneyCnyCircleLine,
+    subItems: [
+      { href: '/funds/expenses', label: '支出・証憑登録', icon: GiExpense },
+    ],
+  },
   { href: '/logout', label: 'ログアウト', icon: RiLogoutCircleRLine }
 ]

@@ -16,6 +16,7 @@
 # production
 /build
 /public/avatars
+/public/files
 !/app/build
 
 # misc
