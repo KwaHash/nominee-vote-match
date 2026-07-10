@@ -44,7 +44,7 @@ export const navItems: NavEntry[] = [
     label: '資金・成果',
     icon: RiMoneyCnyCircleLine,
     subItems: [
-      { href: '/funds/expenses', label: '支出・証憑登録', icon: GiExpense },
+      { href: '/funds/expenses/list', label: '支出・証憑登録', icon: GiExpense },
     ],
   },
   { href: '/logout', label: 'ログアウト', icon: RiLogoutCircleRLine }
