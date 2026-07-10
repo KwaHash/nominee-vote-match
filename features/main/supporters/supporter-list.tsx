@@ -4,7 +4,6 @@ import { useEffect, useMemo, useState } from 'react'
 import axios from 'axios'
 import Link from 'next/link'
 import { FaPlus } from 'react-icons/fa6'
-import { deleteSupporter } from './actions'
 import SupporterItem from '@/components/item/supporter-item'
 import Loading from '@/components/loading-indicator'
 import MainHero from '@/components/main-hero'
@@ -91,11 +90,14 @@ export default function SupporterListPage() {
       description: 'この支援者を削除しますか？',
       onDelete: async () => {
         setIsLoading(true)
-        const { error } = await deleteSupporter(id)
-        if (error) {
-          setError(error)
-        } else {
+        try {
+          await axios.delete(`/api/supporters/${id}`)
           setSupporters((prev) => prev.filter((s) => s.id !== id))
+        } catch (err) {
+          const message = axios.isAxiosError<{ error?: string }>(err)
+            ? err.response?.data?.error ?? '支援者の削除に失敗しました。'
+            : '支援者の削除に失敗しました。'
+          setError(message)
         }
         setIsLoading(false)
       }

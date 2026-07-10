@@ -1,7 +1,8 @@
-'use server'
-
+import { NextResponse, type NextRequest } from 'next/server'
 import { type ICandidateProfile } from '@/types/profile.d'
 import { createSupabaseServerClient } from '@/utils/supabase/server'
+
+export const runtime = 'nodejs'
 
 const PROFILE_COLUMNS = [
   'kanji_name', 'hiragana_name', 'avatar', 'party', 'birth_date',
@@ -10,15 +11,14 @@ const PROFILE_COLUMNS = [
 ].join(', ')
 
 // Load the current candidate's profile (null if not saved yet).
-export async function getProfile(): Promise<{
-  profile: ICandidateProfile | null;
-  error: string | null;
-}> {
+export async function GET() {
   const supabase = createSupabaseServerClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
 
   if (!user) {
-    return { profile: null, error: '認証が必要です。' }
+    return NextResponse.json({ error: '認証が必要です。' }, { status: 401 })
   }
 
   const { data, error } = await supabase
@@ -28,21 +28,24 @@ export async function getProfile(): Promise<{
     .maybeSingle()
 
   if (error) {
-    return { profile: null, error: error.message }
+    return NextResponse.json({ error: error.message }, { status: 500 })
   }
 
-  return { profile: (data as ICandidateProfile | null) ?? null, error: null }
+  return NextResponse.json({ profile: (data as ICandidateProfile | null) ?? null })
 }
 
-export async function saveProfile(
-  profile: ICandidateProfile
-): Promise<{ error: string | null }> {
+// Upsert the current candidate's profile (one row per candidate).
+export async function PUT(req: NextRequest) {
   const supabase = createSupabaseServerClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
 
   if (!user) {
-    return { error: '認証が必要です。' }
+    return NextResponse.json({ error: '認証が必要です。' }, { status: 401 })
   }
+
+  const profile = (await req.json()) as ICandidateProfile
 
   const row = {
     candidate_id: user.id,
@@ -67,8 +70,8 @@ export async function saveProfile(
     .upsert(row, { onConflict: 'candidate_id' })
 
   if (error) {
-    return { error: error.message }
+    return NextResponse.json({ error: error.message }, { status: 500 })
   }
 
-  return { error: null }
+  return NextResponse.json({})
 }

@@ -2,13 +2,13 @@
 
 import { useState } from 'react'
 import { yupResolver } from '@hookform/resolvers/yup'
+import axios from 'axios'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useForm } from 'react-hook-form'
 import { FiLock } from 'react-icons/fi'
 import { HiMiniArrowRightStartOnRectangle } from 'react-icons/hi2'
 import * as yup from 'yup'
-import { resetPassword } from './actions'
 import InputField from '@/components/input/input-field'
 import RequiredLabel from '@/components/label/required-label'
 import { Button } from '@/components/ui/button'
@@ -42,11 +42,7 @@ const ResetPasswordPage = () => {
 
     try {
       const { password } = data
-      const { error } = await resetPassword(password)
-      if (error) {
-        setErrorMessage(error || 'パスワード再設定に失敗しました')
-        return
-      }
+      await axios.post('/api/auth/reset-password', { password })
 
       setSuccessMessage(
         <div className="flex flex-col items-center space-y-2">
@@ -61,11 +57,10 @@ const ResetPasswordPage = () => {
         </div>,
       )
     } catch (error) {
-      if (error instanceof Error) {
-        setErrorMessage(error.message || 'パスワード再設定に失敗しました')
-      } else {
-        setErrorMessage('パスワード再設定に失敗しました')
-      }
+      const message = axios.isAxiosError<{ error?: string }>(error)
+        ? error.response?.data?.error
+        : undefined
+      setErrorMessage(message || 'パスワード再設定に失敗しました')
     } finally {
       setIsLoading(false)
     }

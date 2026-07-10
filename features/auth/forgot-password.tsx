@@ -2,13 +2,13 @@
 
 import { useState } from 'react'
 import { yupResolver } from '@hookform/resolvers/yup'
+import axios from 'axios'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useForm } from 'react-hook-form'
 import { FiMail } from 'react-icons/fi'
 import { HiMiniArrowRightStartOnRectangle } from 'react-icons/hi2'
 import * as yup from 'yup'
-import { forgotPassword } from './actions'
 import InputField from '@/components/input/input-field'
 import RequiredLabel from '@/components/label/required-label'
 import { Button } from '@/components/ui/button'
@@ -40,18 +40,13 @@ export default function ForgotPasswordPage() {
     const { email } = data
 
     try {
-      const { error } = await forgotPassword(email)
-      if (error) {
-        setErrorMessage(error || '送信中にエラーが発生しました')
-        return
-      }
+      await axios.post('/api/auth/forgot-password', { email })
       setSuccessMessage('正常に送信が完了いたしました。メールを確認してパスワードをリセットしてください')
     } catch (error) {
-      if (error instanceof Error) {
-        setErrorMessage(error.message || '送信中にエラーが発生しました')
-      } else {
-        setErrorMessage('送信中にエラーが発生しました')
-      }
+      const message = axios.isAxiosError<{ error?: string }>(error)
+        ? error.response?.data?.error
+        : undefined
+      setErrorMessage(message || '送信中にエラーが発生しました')
     } finally {
       setIsLoading(false)
     }
