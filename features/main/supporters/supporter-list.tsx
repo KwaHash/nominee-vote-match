@@ -1,9 +1,10 @@
 'use client'
 
 import { useEffect, useMemo, useState } from 'react'
+import axios from 'axios'
 import Link from 'next/link'
 import { FaPlus } from 'react-icons/fa6'
-import { getSupporters, deleteSupporter } from './actions'
+import { deleteSupporter } from './actions'
 import SupporterItem from '@/components/item/supporter-item'
 import Loading from '@/components/loading-indicator'
 import MainHero from '@/components/main-hero'
@@ -37,13 +38,19 @@ export default function SupporterListPage() {
 
   useEffect(() => {
     const fetchSupporters = async () => {
-      const { supporters, error: fetchError } = await getSupporters()
-      if (fetchError) {
-        setError(fetchError)
-      } else if (supporters) {
-        setSupporters(supporters)
+      try {
+        const { data } = await axios.get<{ supporters: Supporter[] | null }>('/api/supporters')
+        if (data.supporters) {
+          setSupporters(data.supporters)
+        }
+      } catch (err) {
+        const message = axios.isAxiosError<{ error?: string }>(err)
+          ? err.response?.data?.error ?? '支援者の取得に失敗しました。'
+          : '支援者の取得に失敗しました。'
+        setError(message)
+      } finally {
+        setIsLoading(false)
       }
-      setIsLoading(false)
     }
 
     void fetchSupporters()
