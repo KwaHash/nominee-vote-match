@@ -63,6 +63,7 @@ jobs:
         run: |
           mkdir -p deploy
           cp -r .next deploy/
+          rm -rf deploy/.next/cache   # webpack cache is unused by `next start`; shipping it only adds bloat/risk
           cp -r public deploy/
           cp -r app deploy/
           cp -r components deploy/
@@ -102,32 +103,64 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: ${{ secrets.SSH_PORT || 22 }}
           script: |
+            set -e
             cd /var/www/nominee-vote-match
 
-            # Backup current deployment
-            if [ -d ".next" ]; then
-              echo "Backing up current deployment..."
-              tar -czf backup-$(date +%Y%m%d-%H%M%S).tar.gz .next public app components features hooks lib providers stores styles types utils package.json package-lock.json next.config.mjs tsconfig.json tailwind.config.ts postcss.config.mjs components.json middleware.ts 2>/dev/null || true
-            fi
+            # Match the CI build's Node major (22) at runtime. Building on 22 and
+            # running on 20 is a source of subtle build/runtime skew (and the
+            # @supabase deprecation warning).
+            export NVM_DIR="$HOME/.nvm"
+            [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh" && nvm use 22 >/dev/null 2>&1 || true
+            echo "Using Node $(node -v)"
 
-            # Remove the old build so the server never serves a mix of two
-            # builds (stale Server Action IDs -> "Failed to find Server Action")
-            echo "Removing old .next build..."
-            rm -rf .next
+            # Extract into a clean staging dir on the SAME filesystem as the app,
+            # never over the live tree. A partial/interrupted extract on top of
+            # the running .next is exactly what produces a mixed build -- page
+            # bundles from build A, action manifest from build B -- which fails
+            # every Server Action call with "Failed to find Server Action".
+            STAGE=/var/www/.nvm-release
+            rm -rf "$STAGE" && mkdir -p "$STAGE"
+            echo "Extracting new deployment to staging..."
+            tar -xzf /tmp/deploy.tar.gz -C "$STAGE"
 
-            # Extract new deployment
-            echo "Extracting new deployment..."
-            tar -xzf /tmp/deploy.tar.gz -C /var/www/nominee-vote-match
+            # Atomically swap .next so the runtime only ever sees one whole build.
+            echo "Swapping in new .next build..."
+            rm -rf .next.old
+            [ -d .next ] && mv .next .next.old
+            mv "$STAGE/.next" .next
+
+            # Sync the rest of the app tree (source dirs are read at build time
+            # only, but keep them current for parity/debugging).
+            for d in public app components features hooks lib providers stores styles types utils; do
+              [ -d "$STAGE/$d" ] && { rm -rf "$d"; cp -r "$STAGE/$d" "$d"; }
+            done
+            for f in package.json package-lock.json next.config.mjs tsconfig.json tailwind.config.ts postcss.config.mjs components.json middleware.ts; do
+              [ -f "$STAGE/$f" ] && cp -f "$STAGE/$f" "$f"
+            done
 
             # Install production dependencies
             echo "Installing dependencies..."
-            npm ci --production
+            npm ci --omit=dev
 
-            # Restart PM2 application
+            # Gate: refuse to serve a mixed build. The supporters/list action id
+            # registered in the manifest must also exist in that page's bundle.
+            echo "Verifying build consistency..."
+            MID=$(grep -oE '[0-9a-f]{40}":\{"workers":\{"app/\(main\)/supporters/list' .next/server/server-reference-manifest.json | grep -oE '^[0-9a-f]{40}' | head -1 || true)
+            if [ -n "$MID" ] && ! grep -q "$MID" ".next/server/app/(main)/supporters/list/page.js"; then
+              echo "::error::Mixed build detected (manifest action id $MID missing from page bundle). Rolling back."
+              rm -rf .next && [ -d .next.old ] && mv .next.old .next
+              exit 1
+            fi
+
+            # Restart as a single fork-mode instance. Delete first so no stale
+            # process keeps an old in-memory action manifest and we never double-run.
             echo "Restarting PM2 application..."
-            pm2 restart nominee-vote-match-app --update-env || pm2 start npm --name "nominee-vote-match-app" -- start
+            pm2 delete nominee-vote-match-app 2>/dev/null || true
+            pm2 start npm --name "nominee-vote-match-app" -- start
+            pm2 save
 
             # Cleanup
+            rm -rf "$STAGE" .next.old
             rm -f /tmp/deploy.tar.gz
 
             echo "Deployment completed successfully!"
