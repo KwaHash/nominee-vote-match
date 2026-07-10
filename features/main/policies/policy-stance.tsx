@@ -13,7 +13,6 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { Textarea } from '@/components/ui/textarea'
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
 import { importanceOptions, policyQuestions } from '@/constants/policy.c'
-import { useAuth } from '@/providers/auth-provider'
 import  { type PolicyImportance, type PolicyQuestionAnswer } from '@/types/policy.d'
 
 const defaultQuestionAnswers: PolicyQuestionAnswer[] = policyQuestions.map((q) => ({
@@ -30,7 +29,6 @@ const PolicyStancePage = () => {
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
   const [questionAnswers, setQuestionAnswers] = useState(defaultQuestionAnswers)
-  const { user_id } = useAuth()
 
   useEffect(() => {
     const fetchPolicyStance = async () => {
@@ -57,7 +55,7 @@ const PolicyStancePage = () => {
     }
 
     void fetchPolicyStance()
-  }, [user_id])
+  }, [])
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
