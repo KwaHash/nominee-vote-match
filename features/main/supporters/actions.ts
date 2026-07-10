@@ -3,6 +3,11 @@
 import { type Supporter, type SupporterForm } from '@/types/supporter.d'
 import { createSupabaseServerClient } from '@/utils/supabase/server'
 
+const SUPPORTER_COLUMNS = [
+  'id', 'candidate_id', 'name', 'kind', 'support_types', 'interests',
+  'region', 'visibility', 'contact_note', 'next_action', 'created_at', 'updated_at',
+].join(', ')
+
 // Fetch all supporters registered by the current candidate (newest first).
 export async function getSupporters(): Promise<{
   data: Supporter[]
@@ -17,15 +22,15 @@ export async function getSupporters(): Promise<{
 
   const { data, error } = await supabase
     .from('candidate_supporters')
-    .select('*')
+    .select(SUPPORTER_COLUMNS)
     .eq('candidate_id', user.id)
     .order('created_at', { ascending: false })
-  
+
   if (error) {
     return { data: [], error: error.message }
   }
 
-  return { data: (data ?? []) as Supporter[], error: null }
+  return { data: (data ?? []) as unknown as Supporter[], error: null }
 }
 
 // Fetch a single supporter owned by the current candidate.
@@ -42,17 +47,16 @@ export async function getSupporter(id: string): Promise<{
 
   const { data, error } = await supabase
     .from('candidate_supporters')
-    .select('*')
+    .select(SUPPORTER_COLUMNS)
     .eq('candidate_id', user.id)
     .eq('id', id)
-    .limit(1)
+    .maybeSingle()
 
   if (error) {
     return { data: null, error: error.message }
   }
 
-  const rows = (data ?? []) as Supporter[]
-  return { data: rows[0] ?? null, error: null }
+  return { data: (data as unknown as Supporter | null) ?? null, error: null }
 }
 
 // Insert a new supporter for the current candidate (one candidate -> many supporters).
