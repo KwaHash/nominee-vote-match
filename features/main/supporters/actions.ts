@@ -13,6 +13,7 @@ export async function getSupporters(): Promise<{
   supporters: Supporter[] | null
   error: string | null
 }> {
+  console.log('getSupporters called')
   const supabase = createSupabaseServerClient()
   const { data: { user } } = await supabase.auth.getUser()
 
@@ -20,11 +21,15 @@ export async function getSupporters(): Promise<{
     return { supporters: null, error: '認証が必要です。' }
   }
 
+  console.log('user', user)
+
   const { data, error } = await supabase
     .from('candidate_supporters')
     .select('*')
     .eq('candidate_id', user.id)
     .order('created_at', { ascending: false })
+
+  console.log('data', data, 'error', error)
 
   if (error) {
     return { supporters: null, error: error.message }
