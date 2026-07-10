@@ -10,27 +10,27 @@ const SUPPORTER_COLUMNS = [
 
 // Fetch all supporters registered by the current candidate (newest first).
 export async function getSupporters(): Promise<{
-  data: Supporter[]
+  supporters: Supporter[] | null
   error: string | null
 }> {
   const supabase = createSupabaseServerClient()
   const { data: { user } } = await supabase.auth.getUser()
 
   if (!user) {
-    return { data: [], error: '認証が必要です。' }
+    return { supporters: null, error: '認証が必要です。' }
   }
 
   const { data, error } = await supabase
     .from('candidate_supporters')
-    .select(SUPPORTER_COLUMNS)
+    .select('*')
     .eq('candidate_id', user.id)
     .order('created_at', { ascending: false })
 
   if (error) {
-    return { data: [], error: error.message }
+    return { supporters: null, error: error.message }
   }
 
-  return { data: (data ?? []) as unknown as Supporter[], error: null }
+  return { supporters: (data as Supporter[] | null) ?? null, error: null }
 }
 
 // Fetch a single supporter owned by the current candidate.
