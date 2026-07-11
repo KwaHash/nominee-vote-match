@@ -22,6 +22,8 @@ const typeOptions = ['すべて', ...Object.values(txTypeLabels)] as const
 const categoryOptions = ['すべて', ...incomeCategories, ...expenseCategories] as const
 const publicOptions = ['すべて', '公開', '非公開'] as const
 
+const yen = (n: number) => `${n.toLocaleString('ja-JP')}円`
+
 export default function FundsExpensesListPage() {
   const dispatch = useAppDispatch()
   const [isLoading, setIsLoading] = useState(true)
@@ -77,6 +79,17 @@ export default function FundsExpensesListPage() {
     })
   }, [expenses, keyword, type, category, publicity])
 
+  // Totals across the whole ledger (independent of filters/pagination).
+  const { totalIncome, totalExpense, balance } = useMemo(() => {
+    let totalIncome = 0
+    let totalExpense = 0
+    for (const expense of expenses) {
+      if (expense.type === 'income') totalIncome += expense.amount
+      else totalExpense += expense.amount
+    }
+    return { totalIncome, totalExpense, balance: totalIncome - totalExpense }
+  }, [expenses])
+
   // Reset to the first page whenever the filters or page size change.
   useEffect(() => {
     setCurrentPage(0)
@@ -119,6 +132,24 @@ export default function FundsExpensesListPage() {
         {error && (
           <p className='mb-6 bg-red-50 border-l-4 border-red-400 p-4 text-sm text-red-700'>{error}</p>
         )}
+
+        {/* Overview */}
+        <div className='mb-8 grid grid-cols-1 sm:grid-cols-3 gap-3 md:gap-4'>
+          <div className='rounded-lg border border-gray-200 bg-white p-4'>
+            <p className='text-xs text-gray-500'>収入計</p>
+            <p className='mt-1 text-xl font-bold text-emerald-600'>{yen(totalIncome)}</p>
+          </div>
+          <div className='rounded-lg border border-gray-200 bg-white p-4'>
+            <p className='text-xs text-gray-500'>支出計</p>
+            <p className='mt-1 text-xl font-bold text-rose-600'>{yen(totalExpense)}</p>
+          </div>
+          <div className='rounded-lg border border-gray-200 bg-white p-4'>
+            <p className='text-xs text-gray-500'>残高</p>
+            <p className={`mt-1 text-xl font-bold ${balance < 0 ? 'text-rose-600' : 'text-gray-900'}`}>
+              {yen(balance)}
+            </p>
+          </div>
+        </div>
 
         <div className='mb-8 flex justify-end'>
           <Button asChild
