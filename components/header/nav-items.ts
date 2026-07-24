@@ -1,8 +1,9 @@
 import  { type IconType } from 'react-icons'
 import { FaRobot, FaListUl, FaRegRegistered } from 'react-icons/fa'
 import { GiExpense } from 'react-icons/gi'
-import { MdPolicy } from 'react-icons/md'
-import { RiBook2Line, RiMoneyCnyCircleLine, RiRobot2Line, RiSendPlaneLine, RiUserStarLine , RiLogoutCircleRLine} from 'react-icons/ri'
+import { MdPolicy , MdOutlineQuestionAnswer } from 'react-icons/md'
+import { RiUserCommunityFill , RiBook2Line, RiMoneyCnyCircleLine, RiRobot2Line, RiSendPlaneLine, RiUserStarLine , RiLogoutCircleRLine} from 'react-icons/ri'
+
 
 export type NavItem = {
   href: string
@@ -31,7 +32,14 @@ export const navItems: NavEntry[] = [
       { href: '/ai-secretary', label: 'AI政策秘書', icon: FaRobot },
     ],
   },
-  { href: '/communications', label: '発信', icon: RiSendPlaneLine },
+  {
+    icon: RiSendPlaneLine,
+    label: '発信',
+    subItems: [
+      { href: '/community', label: 'コミュニティ', icon: RiUserCommunityFill },
+      { href: '/public-answers', label: '公開質問', icon: MdOutlineQuestionAnswer },
+    ],
+  },
   {
     label: '支援者',
     icon: RiUserStarLine,
