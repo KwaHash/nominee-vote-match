@@ -1,9 +1,14 @@
 import  { type IconType } from 'react-icons'
+import { CgProfile } from 'react-icons/cg'
 import { FaRobot, FaListUl, FaRegRegistered } from 'react-icons/fa'
 import { GiExpense } from 'react-icons/gi'
 import { MdPolicy , MdOutlineQuestionAnswer } from 'react-icons/md'
-import { RiUserCommunityFill , RiBook2Line, RiMoneyCnyCircleLine, RiRobot2Line, RiSendPlaneLine, RiUserStarLine , RiLogoutCircleRLine} from 'react-icons/ri'
-
+import {
+  RiBook2Line, RiMoneyCnyCircleLine,
+  RiSendPlaneLine, RiUserCommunityFill, RiUserStarLine,
+ RiLogoutCircleRLine, RiRobot2Line,
+} from 'react-icons/ri'
+import { TbDashboard } from 'react-icons/tb'
 
 export type NavItem = {
   href: string
@@ -23,7 +28,13 @@ export const isNavGroup = (entry: NavEntry): entry is NavGroup =>
   'subItems' in entry
 
 export const navItems: NavEntry[] = [
-  { href: '/today-tasks', label: '今日やること', icon: RiRobot2Line },
+  { 
+    label: '今日やること',
+    icon: TbDashboard,
+    subItems: [
+      { href: '/dashboard', label: 'ダッシュボード', icon: RiRobot2Line },
+    ],
+  },
   { 
     label: ' 政策',
     icon: RiBook2Line,
@@ -55,5 +66,6 @@ export const navItems: NavEntry[] = [
       { href: '/funds/expenses/list', label: '支出・証憑登録', icon: GiExpense },
     ],
   },
+  { href: '/profile', label: 'プロフィール', icon: CgProfile },
   { href: '/logout', label: 'ログアウト', icon: RiLogoutCircleRLine }
 ]

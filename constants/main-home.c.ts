@@ -2,20 +2,21 @@ import { FaListUl, FaRegRegistered, FaRobot } from 'react-icons/fa'
 import { GiExpense } from 'react-icons/gi'
 import { MdOutlineQuestionAnswer, MdPolicy } from 'react-icons/md'
 import {
-  RiBook2Line, RiDashboardLine, RiMoneyCnyCircleLine, RiRobot2Line,
+  RiBook2Line, RiMoneyCnyCircleLine, RiRobot2Line,
   RiSendPlaneLine, RiUserCommunityFill, RiUserStarLine,
 } from 'react-icons/ri'
+import { TbDashboard } from 'react-icons/tb'
 import { type MenuGroup } from '@/types/main-home.d'
 
 export const menuGroups: MenuGroup[] = [
   {
     accent: 'blue',
-    icon: RiDashboardLine,
+    icon: TbDashboard,
     title: '今日やること',
     lead: '次に何をすべきかが、一目でわかる。',
     items: [
       {
-        href: '/today-tasks',
+        href: '/dashboard',
         label: 'ダッシュボード',
         note: '選挙活動のタスクを束ね、AIが今日の一手を提案します。',
         icon: RiRobot2Line,
