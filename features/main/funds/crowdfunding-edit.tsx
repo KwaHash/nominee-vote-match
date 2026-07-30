@@ -165,7 +165,7 @@ export default function CrowdFundingEditPage({ id }: { id: string }) {
         }
       />
 
-      <section className='w-full max-w-4xl mx-auto px-4 md:px-8 py-12'>
+      <section className='w-full max-w-6xl mx-auto px-4 md:px-8 py-12'>
         <Link href='/funds/crowdfunding/list'
           className='group mb-6 inline-flex items-center gap-1 text-base font-medium text-green-700'
         >

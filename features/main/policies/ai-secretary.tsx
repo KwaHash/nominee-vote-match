@@ -118,7 +118,7 @@ const AISecretaryPage = () => {
         }
       />
 
-      <section className='w-full max-w-4xl mx-auto px-4 md:px-8 py-12'>
+      <section className='w-full max-w-6xl mx-auto px-4 md:px-8 py-12'>
         <div className='space-y-6'>
           {/* Tool selector */}
           <div className='flex flex-col gap-2'>

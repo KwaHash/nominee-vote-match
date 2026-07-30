@@ -122,7 +122,7 @@ const CommunityPage = () => {
         }
       />
 
-      <section className='w-full max-w-4xl mx-auto px-4 md:px-8 py-12'>
+      <section className='w-full max-w-6xl mx-auto px-4 md:px-8 py-12'>
         <div className='space-y-6'>
           {/* Today's ideas */}
           <div className='overflow-hidden rounded-lg border border-gray-200 bg-white'>
