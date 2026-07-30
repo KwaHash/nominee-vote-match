@@ -84,7 +84,7 @@ const DateField = ({ id, value, onChange, disabled }: DateFieldProps) => {
   )
 }
 
-export default function CrowdFundingPage() {
+export default function CrowdFundingCreatePage() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
@@ -199,7 +199,7 @@ export default function CrowdFundingPage() {
   return (
     <div className='min-h-screen bg-white'>
       <MainHero
-        title='政策応援'
+        title='政策応援作成'
         description={
           <>
             政策単位で「応援ページ」を立ち上げます。<br />
