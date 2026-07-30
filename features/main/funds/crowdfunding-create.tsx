@@ -157,7 +157,7 @@ export default function CrowdFundingCreatePage() {
         }
       />
 
-      <section className='w-full max-w-4xl mx-auto px-4 md:px-8 py-12'>
+      <section className='w-full max-w-6xl mx-auto px-4 md:px-8 py-12'>
         <form onSubmit={handleSubmit} className='space-y-6'>
           <p className='rounded border border-amber-200 bg-amber-50 p-4 text-[13px] leading-relaxed text-amber-800'>
             献金・寄付・選挙運動に関する取り扱いは、政治資金規正法・公職選挙法等の確認が必要です。
