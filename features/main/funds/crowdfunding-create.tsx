@@ -2,16 +2,14 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import axios from 'axios'
-import { format } from 'date-fns'
-import { ja } from 'date-fns/locale'
+import { useRouter } from 'next/navigation'
 import { FaPlus, FaSpinner, FaWandMagicSparkles, FaXmark } from 'react-icons/fa6'
 import { MdOutlineDescription, MdOutlineFlag, MdOutlineGavel, MdOutlinePayments, MdOutlineSmartToy } from 'react-icons/md'
+import CampaignDateField from '@/components/campaign-date-field'
 import MainHero from '@/components/main-hero'
 import { Button } from '@/components/ui/button'
-import { Calendar } from '@/components/ui/calendar'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
@@ -23,7 +21,6 @@ import {
   type CrowdfundingVisibility, type ExpensePlanRow, type RegionLevel,
 } from '@/types/crowdfunding.d'
 import {
-  CAMPAIGN_DATE_FORMAT, CAMPAIGN_DATE_FROM_YEAR, CAMPAIGN_DATE_TO_YEAR,
   formatCampaignDate, parseCampaignDate, requestCrowdfundingDraft, sortSupportTypes,
 } from '@/utils/crowdfunding.u'
 
@@ -35,56 +32,8 @@ const legalActiveClassName: Record<string, string> = {
   承認済み: 'data-[state=on]:bg-emerald-100 data-[state=on]:border-emerald-100 data-[state=on]:text-emerald-700',
 }
 
-interface DateFieldProps {
-  id?: string
-  value: string
-  onChange: (value: string) => void
-  disabled?: (date: Date) => boolean
-}
-
-const DateField = ({ id, value, onChange, disabled }: DateFieldProps) => {
-  const selectedDate = parseCampaignDate(value)
-  return (
-    <Popover>
-      <PopoverTrigger asChild>
-        <Button
-          type='button'
-          variant='outline'
-          id={id}
-          className={cn('h-10 w-full justify-start rounded text-left font-normal', !value && 'text-muted-foreground')}
-        >
-          {selectedDate ? format(selectedDate, CAMPAIGN_DATE_FORMAT, { locale: ja }) : '日付を選択'}
-        </Button>
-      </PopoverTrigger>
-      <PopoverContent className='w-auto p-0' align='start'>
-        <Calendar
-          mode='single'
-          captionLayout='dropdown'
-          startMonth={new Date(CAMPAIGN_DATE_FROM_YEAR, 0)}
-          endMonth={new Date(CAMPAIGN_DATE_TO_YEAR, 11)}
-          selected={selectedDate}
-          onSelect={(date) => onChange(date ? formatCampaignDate(date) : '')}
-          disabled={disabled}
-          defaultMonth={selectedDate}
-          locale={ja}
-          formatters={{
-            formatMonthDropdown: (month) => format(month, 'M月', { locale: ja }),
-            formatYearDropdown: (year) => format(year, 'yyyy年', { locale: ja }),
-          }}
-          labels={{
-            labelMonthDropdown: () => '月を選択',
-            labelYearDropdown: () => '年を選択',
-            labelPrevious: () => '前の月',
-            labelNext: () => '次の月',
-          }}
-          autoFocus
-        />
-      </PopoverContent>
-    </Popover>
-  )
-}
-
 export default function CrowdFundingCreatePage() {
+  const router = useRouter()
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
@@ -187,7 +136,7 @@ export default function CrowdFundingCreatePage() {
     setIsSubmitting(true)
     try {
       await axios.post('/api/funds/crowdfunding', project)
-      setSuccess('政策応援ページを保存しました。')
+      router.push('/funds/crowdfunding/list')
     } catch (err) {
       const message = axios.isAxiosError<{ error?: string }>(err) ? 
         err.response?.data?.error ?? 'プロジェクトの保存に失敗しました。' : 'プロジェクトの保存に失敗しました。'
@@ -439,11 +388,11 @@ export default function CrowdFundingCreatePage() {
               <div className='grid grid-cols-1 gap-6 md:grid-cols-2'>
                 <div className='flex flex-col gap-2'>
                   <Label htmlFor='cf-start' className='text-sm font-medium text-gray-800'>開始日</Label>
-                  <DateField id='cf-start' value={startDate} onChange={setStartDate} />
+                  <CampaignDateField id='cf-start' value={startDate} onChange={setStartDate} />
                 </div>
                 <div className='flex flex-col gap-2'>
                   <Label htmlFor='cf-end' className='text-sm font-medium text-gray-800'>終了日</Label>
-                  <DateField
+                  <CampaignDateField
                     id='cf-end'
                     value={endDate}
                     onChange={setEndDate}

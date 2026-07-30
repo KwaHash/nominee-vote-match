@@ -157,7 +157,7 @@ export default function CrowdFundingListPage() {
           >
             <Link href='/funds/crowdfunding/create' className='flex items-center gap-2'>
               <FaPlus className='h-4 w-4' />
-              <span>新しい政策応援ページを作成</span>
+              <span>新しい政策応援を作成</span>
             </Link>
           </Button>
         </div>
