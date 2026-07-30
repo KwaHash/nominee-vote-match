@@ -1,6 +1,6 @@
 import { type IconType } from 'react-icons'
 
-export type MenuAccent = 'blue' | 'emerald' | 'sky' | 'violet' | 'amber'
+export type MenuAccent = 'blue' | 'emerald' | 'sky' | 'violet' | 'amber' | 'rose'
 
 export interface MenuItem {
   href: string

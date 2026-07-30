@@ -1,9 +1,10 @@
+import { CgProfile } from 'react-icons/cg'
 import { FaListUl, FaRegRegistered, FaRobot } from 'react-icons/fa'
 import { GiExpense } from 'react-icons/gi'
-import { MdOutlineQuestionAnswer, MdPolicy } from 'react-icons/md'
+import { MdOutlineQuestionAnswer, MdOutlineSupport, MdPolicy } from 'react-icons/md'
 import {
   RiBook2Line, RiMoneyCnyCircleLine, RiRobot2Line,
-  RiSendPlaneLine, RiUserCommunityFill, RiUserStarLine,
+  RiSendPlaneLine, RiUserCommunityFill, RiUserSettingsLine, RiUserStarLine,
 } from 'react-icons/ri'
 import { TbDashboard } from 'react-icons/tb'
 import { type MenuGroup } from '@/types/main-home.d'
@@ -90,10 +91,30 @@ export const menuGroups: MenuGroup[] = [
     lead: '集めて、見せて、信頼に変える。',
     items: [
       {
+        href: '/funds/crowdfunding/list',
+        label: '政策応援',
+        note: '政策ごとに応援ページを立ち上げ、寄付・ボランティアを募ります。',
+        icon: MdOutlineSupport,
+      },
+      {
         href: '/funds/expenses/list',
         label: '収支明細',
         note: '収入・支出を証憑つきで登録し、透明化ダッシュボードへ。',
         icon: GiExpense,
+      },
+    ],
+  },
+  {
+    accent: 'rose',
+    icon: RiUserSettingsLine,
+    title: 'アカウントを整える',
+    lead: 'あなたの情報が、信頼の入口。',
+    items: [
+      {
+        href: '/profile',
+        label: 'プロフィール',
+        note: '経歴・政策・連絡先を登録。有権者に見える顔をつくります。',
+        icon: CgProfile,
       },
     ],
   },

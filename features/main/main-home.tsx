@@ -32,6 +32,11 @@ const accentClassName: Record<MenuAccent, { badge: string; item: string; arrow: 
     item: 'hover:border-amber-200 hover:bg-amber-50/60',
     arrow: 'group-hover/item:text-amber-600',
   },
+  rose: {
+    badge: 'bg-rose-50 text-rose-600',
+    item: 'hover:border-rose-200 hover:bg-rose-50/60',
+    arrow: 'group-hover/item:text-rose-600',
+  },
 }
 
 const MainHomePage = () => {
