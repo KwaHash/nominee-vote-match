@@ -3,12 +3,17 @@ import OpenAI from 'openai'
 
 export async function POST(request: Request) {
   try {
-    const { messages } = await request.json() as { messages: Array<{ role: string; content: string }> }
+    // response_format is optional: callers that need machine-readable output pass json_object.
+    const { messages, response_format: responseFormat } = await request.json() as {
+      messages: Array<{ role: string; content: string }>
+      response_format?: { type: 'text' } | { type: 'json_object' }
+    }
     const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
 
     const stream = await openai.chat.completions.create({
       model: 'gpt-4o',
       messages: messages as OpenAI.ChatCompletionMessageParam[],
+      ...(responseFormat ? { response_format: responseFormat } : {}),
       stream: true,
     })
 
