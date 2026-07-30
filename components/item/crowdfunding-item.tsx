@@ -1,4 +1,5 @@
-import { FaTrashAlt } from 'react-icons/fa'
+import Link from 'next/link'
+import { FaPencilAlt, FaTrashAlt } from 'react-icons/fa'
 import StatusItem from './status-item'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
@@ -79,6 +80,12 @@ const CrowdfundingItem = ({ project, handleDelete }: CrowdfundingItemProps) => {
         )}
       </div>
       <div className="flex flex-col shrink-0 ml-auto pt-5 pr-3 gap-2 w-[100px]">
+        <Link href={`/funds/crowdfunding/${project.id}`}
+          className="flex items-center justify-center py-1.5 rounded-[1px] text-sm bg-m-blue text-white hover:opacity-90 transition-all duration-300"
+        >
+          <FaPencilAlt className="text-sm mr-1" />
+          <span className="text-sm">編集</span>
+        </Link>
         <Button onClick={() => handleDelete(project.id)}
           className="flex items-center justify-center h-auto py-1.5 rounded-[1px] text-sm bg-m-red hover:bg-m-hover-red text-white hover:opacity-90 transition-all duration-300"
         >
