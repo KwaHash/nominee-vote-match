@@ -2,7 +2,7 @@ import  { type IconType } from 'react-icons'
 import { CgProfile } from 'react-icons/cg'
 import { FaRobot, FaListUl, FaRegRegistered } from 'react-icons/fa'
 import { GiExpense } from 'react-icons/gi'
-import { MdPolicy , MdOutlineQuestionAnswer } from 'react-icons/md'
+import { MdPolicy , MdOutlineQuestionAnswer , MdOutlineSupport } from 'react-icons/md'
 import {
   RiBook2Line, RiMoneyCnyCircleLine,
   RiSendPlaneLine, RiUserCommunityFill, RiUserStarLine,
@@ -63,6 +63,7 @@ export const navItems: NavEntry[] = [
     label: '資金・成果',
     icon: RiMoneyCnyCircleLine,
     subItems: [
+      { href: '/funds/crowdfunding/list', label: '政策応援', icon: MdOutlineSupport },
       { href: '/funds/expenses/list', label: '支出・証憑登録', icon: GiExpense },
     ],
   },
