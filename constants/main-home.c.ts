@@ -1,7 +1,7 @@
 import { CgProfile } from 'react-icons/cg'
 import { FaListUl, FaRegRegistered, FaRobot } from 'react-icons/fa'
 import { GiExpense } from 'react-icons/gi'
-import { MdOutlineQuestionAnswer, MdOutlineSupport, MdPolicy } from 'react-icons/md'
+import { MdOutlineAddTask , MdOutlineQuestionAnswer, MdOutlineSupport, MdPolicy } from 'react-icons/md'
 import {
   RiBook2Line, RiMoneyCnyCircleLine, RiRobot2Line,
   RiSendPlaneLine, RiUserCommunityFill, RiUserSettingsLine, RiUserStarLine,
@@ -21,6 +21,12 @@ export const menuGroups: MenuGroup[] = [
         label: 'ダッシュボード',
         note: '選挙活動のタスクを束ね、AIが今日の一手を提案します。',
         icon: RiRobot2Line,
+      },
+      {
+        href: '/tasks',
+        label: 'タスク管理',
+        note: '選挙・政策活動のタスクを未着手/進行中/完了で管理します。',
+        icon: MdOutlineAddTask,
       },
     ],
   },
